@@ -13,7 +13,7 @@ const requestLogger= (req, res, next) => {
   next()
 }
 
-app.use(requestLogger)
+// app.use(requestLogger)
 app.use(express.static('build'))
 
 let notes = [
