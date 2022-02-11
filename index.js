@@ -14,6 +14,7 @@ const requestLogger= (req, res, next) => {
 }
 
 app.use(requestLogger)
+app.use(express.static('build'))
 
 let notes = [
     {
