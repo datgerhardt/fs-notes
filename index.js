@@ -56,6 +56,22 @@ app.get('/api/notes/:id', (req, res) => {
     }
 })
 
+app.put('/api/notes/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const changeNote = req.body
+    if (!changeNote.content){
+       return res.status(400).json({error:"content is missing"}) 
+    }
+    notes = notes.map(note => note.id !== id ? note :changeNote)
+
+    if (changeNote) {
+        res.json(changeNote)
+    } else {
+        res.status(404).end()
+    }
+})
+
+
 app.delete('/api/notes/:id', (req, res) => {
     const id = Number(req.params.id)
     notes = notes.filter(note => note.id !== id)
