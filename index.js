@@ -43,7 +43,7 @@ app.get('/api/notes/:id', (req, res, next) => {
 })
 
 app.put('/api/notes/:id', (req, res, next) => {
-    const changeNote = req.body
+    const { content, important }= req.body
     if (!changeNote.content){
        return res.status(400).json({error:"content is missing"}) 
     }
