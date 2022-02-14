@@ -1,6 +1,7 @@
 require('dotenv').config()
 const cors = require('cors')
 const express = require('express')
+const { collection } = require('./models/note')
 
 const Note = require('./models/note')
 
@@ -30,21 +31,18 @@ app.get('/api/notes', (req, res) => {
     )
 })
 
-app.get('/api/notes/:id', (req, res) => {
-    Note.findById( req.params.id).then(note => {
+app.get('/api/notes/:id', (req, res, next) => {
+    Note.findById(req.params.id).then(note => {
         if (note){
             res.json(note)
         } else {
             res.status(404).end()
         }
     })
-    .catch((err)=> {
-        console.log(err)
-        res.status(400).send({ error: 'malformatted id' })
-    })
+    .catch(err => next(err))
 })
 
-app.put('/api/notes/:id', (req, res) => {
+app.put('/api/notes/:id', (req, res, next) => {
     const changeNote = req.body
     if (!changeNote.content){
        return res.status(400).json({error:"content is missing"}) 
@@ -53,23 +51,17 @@ app.put('/api/notes/:id', (req, res) => {
     Note.findByIdAndUpdate(req.params.id, changeNote).then(
         updatedNote => res.json(updatedNote)
     )
-    .catch(err => {
-        console.log(err)
-        res.status(400).end()
-    })
+    .catch(err => next(err))
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-    Note.findOneAndRemove(req.params.id).then(
-        () => res.status(204).end()   
+app.delete('/api/notes/:id', (req, res, next) => {
+    Note.findByIdAndRemove( req.params.id).then(
+        result => res.status(204).end()   
     )
-    .catch(err => {
-        console.log(err)
-        res.status(400).end()
-    })
+    .catch(err => next(err) )
 })
 
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
     const body= req.body
     if (body.content === undefined){
        return res.status(400).json({error:"content is missing"}) 
@@ -84,6 +76,8 @@ app.post('/api/notes', (req, res) => {
     note.save().then(
         savedNote => res.json(savedNote)
     )
+    .catch(err => next(err))
+
 })
 
 const unknownEndpoint = (req, res) => {
@@ -91,6 +85,19 @@ const unknownEndpoint = (req, res) => {
 }
 
 app.use(unknownEndpoint)
+
+const errorHandler = (err, req, res, next) => {
+    console.error(err.message)
+
+    if (err.name === 'CastError'){
+        return res.status(400).send({error: 'malformatted id'})
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).json({ error : err.message })
+    }
+    next(err)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT 
 
