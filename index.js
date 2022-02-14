@@ -44,11 +44,9 @@ app.get('/api/notes/:id', (req, res, next) => {
 
 app.put('/api/notes/:id', (req, res, next) => {
     const { content, important }= req.body
-    if (!changeNote.content){
-       return res.status(400).json({error:"content is missing"}) 
-    }
-
-    Note.findByIdAndUpdate(req.params.id, changeNote).then(
+    
+    Note.findByIdAndUpdate(req.params.id, { content, important }, { new: true, runValidators: true, context: 'query' } )
+    .then(
         updatedNote => res.json(updatedNote)
     )
     .catch(err => next(err))
