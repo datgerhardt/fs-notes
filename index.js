@@ -31,31 +31,42 @@ app.get('/api/notes', (req, res) => {
 })
 
 app.get('/api/notes/:id', (req, res) => {
-    Note.findById( req.params.id).then(note => res.json(note))
-    .catch(()=> res.status(404).end())
+    Note.findById( req.params.id).then(note => {
+        if (note){
+            res.json(note)
+        } else {
+            res.status(404).end()
+        }
+    })
+    .catch((err)=> {
+        console.log(err)
+        res.status(400).send({ error: 'malformatted id' })
+    })
 })
 
 app.put('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
     const changeNote = req.body
     if (!changeNote.content){
        return res.status(400).json({error:"content is missing"}) 
     }
-    notes = notes.map(note => note.id !== id ? note :changeNote)
 
-    if (changeNote) {
-        res.json(changeNote)
-    } else {
-        res.status(404).end()
-    }
+    Note.findByIdAndUpdate(req.params.id, changeNote).then(
+        updatedNote => res.json(updatedNote)
+    )
+    .catch(err => {
+        console.log(err)
+        res.status(400).end()
+    })
 })
 
-
 app.delete('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    notes = notes.filter(note => note.id !== id)
-    
-    res.status(204).end()   
+    Note.findOneAndRemove(req.params.id).then(
+        () => res.status(204).end()   
+    )
+    .catch(err => {
+        console.log(err)
+        res.status(400).end()
+    })
 })
 
 app.post('/api/notes', (req, res) => {
