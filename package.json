@@ -6,12 +6,15 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \\\"Error: no test specified\\\" && exit 1",
+    "test": "jest --verbose" ,
     "build:ui": "rm -rf build && cd ../frontend/ && npm run build && cp -r build ../backend",
     "deploy": "git push heroku main",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",
     "logs:prod": "heroku logs --tail",
     "lint": "eslint ."
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "author": "Gerhardt Kwame",
   "license": "MIT",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "eslint": "^8.9.0",
+    "jest": "^27.5.1",
     "nodemon": "^2.0.15"
   }
 }
